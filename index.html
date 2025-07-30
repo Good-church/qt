@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>성서유니온 묵상</title>
+  <meta charset="UTF-8">
+  <title>성서유니온 오늘의 묵상</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body { font-family: sans-serif; margin: 20px; }
     .tabs { display: flex; margin-bottom: 10px; }
@@ -21,67 +21,50 @@
     .content {
       border: 1px solid #ccc;
       padding: 15px;
-      min-height: 200px;
       background: #fff;
+      min-height: 200px;
     }
   </style>
 </head>
 <body>
-
-<h2>📖 오늘의 묵상</h2>
-
+<h2>📖 성서유니온 오늘의 묵상</h2>
 <div class="tabs">
   <div class="tab active" data-tab="calendar">읽기표</div>
   <div class="tab" data-tab="body">본문</div>
   <div class="tab" data-tab="bodycont">해설</div>
 </div>
+<div class="content" id="contentArea">⏳ 불러오는 중...</div>
 
-<div class="content" id="contentArea">불러오는 중...</div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-const baseDate = new Date().toISOString().split('T')[0];
-const qtType = "QT1";
-
-$('.tab').on('click', function() {
-  $('.tab').removeClass('active');
-  $(this).addClass('active');
-  const tab = $(this).data('tab');
-  loadContent(tab);
-});
-
-function loadContent(tab) {
-  $("#contentArea").html("⏳ 불러오는 중...");
-  let url = "/api/" + tab;
-
-  $.ajax({
-    url: url,
+const today = new Date().toISOString().slice(0, 10);
+function loadTab(type) {
+  document.getElementById("contentArea").innerHTML = "⏳ 불러오는 중...";
+  fetch(`/api/${type}`, {
     method: "POST",
-    contentType: "application/json",
-    data: JSON.stringify({ qt_ty: qtType, Base_de: baseDate }),
-    success: function (data) {
-      if (tab === "calendar") {
-        let html = "<table border='1' cellpadding='5'><tr>";
-        for (let i = 0; i < data.length; i++) {
-          if (i % 7 === 0 && i !== 0) html += "</tr><tr>";
-          const day = data[i].Day || "";
-          const name = data[i].Bible_name || "";
-          const chapter = data[i].Bible_chapter || "";
-          html += `<td><strong>${day}</strong><br><small>${name} ${chapter}</small></td>`;
-        }
-        html += "</tr></table>";
-        $("#contentArea").html(html);
-      } else {
-        $("#contentArea").html(data);
-      }
+    headers: {
+      "Content-Type": "application/json"
     },
-    error: () => {
-      $("#contentArea").html("❌ 불러오기에 실패했습니다.");
-    }
+    body: JSON.stringify({ qt_ty: "QT1", Base_de: today })
+  })
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById("contentArea").innerHTML = html;
+  })
+  .catch(() => {
+    document.getElementById("contentArea").innerHTML = "❌ 불러오기에 실패했습니다.";
   });
 }
 
-loadContent("calendar");
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    const type = tab.getAttribute("data-tab");
+    loadTab(type);
+  });
+});
+
+loadTab("calendar");
 </script>
 </body>
 </html>
