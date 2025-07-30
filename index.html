@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>성서유니온 묵상 임베드</title>
+  <title>성서유니온 묵상</title>
   <style>
     body { font-family: sans-serif; margin: 20px; }
     .tabs { display: flex; margin-bottom: 10px; }
@@ -52,10 +52,7 @@ $('.tab').on('click', function() {
 
 function loadContent(tab) {
   $("#contentArea").html("⏳ 불러오는 중...");
-  let url = "";
-  if (tab === "calendar") url = "http://localhost:3000/proxy/bible-calendar";
-  else if (tab === "body") url = "http://localhost:3000/proxy/bible-body";
-  else if (tab === "bodycont") url = "http://localhost:3000/proxy/bible-bodycont";
+  let url = "/api/" + tab;
 
   $.ajax({
     url: url,
